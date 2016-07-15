@@ -1,0 +1,21 @@
+apply plugin: 'groovy'
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'http://maven-repository.openspaces.org/'
+    }
+}
+
+ext {
+    gigaspacesVersion = '10.2.0-13800-RELEASE'
+}
+
+dependencies {
+    compile "com.gigaspaces:gs-openspaces:$gigaspacesVersion"
+    compile "com.gigaspaces:gs-runtime:$gigaspacesVersion"
+    compile 'org.codehaus.groovy:groovy-all:2.4.7'
+    compile 'com.google.guava:guava:19.0'
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+}
