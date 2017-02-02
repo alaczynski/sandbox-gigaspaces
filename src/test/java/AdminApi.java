@@ -30,21 +30,32 @@ public class AdminApi {
 
     public void deployment() {
         Admin admin = new AdminFactory().create();
-        GridServiceManager gridServiceManager = admin.getGridServiceManagers().waitForAtLeastOne();
+        GridServiceManager gsm = admin.getGridServiceManagers().waitForAtLeastOne();
 
-        // pu
-        ProcessingUnitDeployment processingUnitDeployment = new ProcessingUnitDeployment(new File("path.jar"));
-        processingUnitDeployment.name("pu-name");
-        gridServiceManager.deploy(processingUnitDeployment);
-
-        // app
-        ApplicationDeployment applicationDeployment = new ApplicationDeployment("app-name");
-        applicationDeployment.addProcessingUnitDeployment(new ProcessingUnitDeployment(new File("pu-1.jar")));
-        applicationDeployment.addProcessingUnitDeployment(new ProcessingUnitDeployment(new File("pu-2.jar")));
-        gridServiceManager.deploy(applicationDeployment);
+        // deploy pu
+        ProcessingUnitDeployment puDeployment = new ProcessingUnitDeployment(new File("path.jar"));
+        puDeployment.name("pu-name");
+        puDeployment.addZone("zone-1");
+        puDeployment.setContextProperty("key1", "value1");
+        puDeployment.setContextProperty("key2", "value2");
+        gsm.deploy(puDeployment);
 
         // undeploy pu
         admin.getProcessingUnits().waitFor("pu-name").undeployAndWait();
+
+
+        // deploy app
+        ApplicationDeployment appDeployment = new ApplicationDeployment("app-name");
+        // pu-1
+        ProcessingUnitDeployment puDeployment1 = new ProcessingUnitDeployment(new File("pu-1.jar"));
+        puDeployment1.name("pu-name-1");
+        appDeployment.addProcessingUnitDeployment(puDeployment1);
+        // pu-2, depends on pu-1
+        ProcessingUnitDeployment puDeployment2 = new ProcessingUnitDeployment(new File("pu-2.jar"));
+        puDeployment2.name("pu-name-2");
+        puDeployment1.addDependency("pu-name-1");
+        appDeployment.addProcessingUnitDeployment(puDeployment2);
+        gsm.deploy(appDeployment);
 
         // undeploy app
         admin.getApplications().waitFor("app-name").undeployAndWait();
